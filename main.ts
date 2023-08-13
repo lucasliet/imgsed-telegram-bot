@@ -10,10 +10,10 @@ BOT.on('message', async (ctx) => {
   const link: string = ctx.message.text;
   if (link.includes('instagram.com/reel')) {
     const reel = await convertTelegramLink(link);
-    ctx.replyWithVideo({ source: reel });
+    ctx.replyWithVideo({ url: reel });
   } else if (link.includes('instagram.com/p')) {
     const picture = await convertTelegramLink(link);
-    ctx.replyWithPhoto({ source: picture });
+    ctx.replyWithPhoto({ url: picture });
   } else {
     ctx.reply('Please send me a instagram reel/picture link');
   }
