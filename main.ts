@@ -25,15 +25,15 @@ BOT.catch((err) => {
 
 APP.use(async (ctx, next) => {
   try {
-    if(ctx.request.url.pathname !== '/webhook'){
-      ctx.response.body = 'Use with https://t.me/instagram_media_retriever_bot';
+    if (ctx.request.url.pathname !== '/webhook') {
       ctx.response.status = 200;
+      ctx.response.body = 'Use with https://t.me/instagram_media_retriever_bot';
       return;
     }
     await next();
   } catch (err) {
-    ctx.response.body = { message: err.message };
     ctx.response.status = 500;
+    ctx.response.body = { message: err.message };
   }
 });
 

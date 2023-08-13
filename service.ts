@@ -6,12 +6,15 @@ const DOM_PARSER = new DOMParser();
 export async function replyMediaContent(ctx: Context, link: string | undefined) {
   if (link?.includes('instagram.com/reel')) {
     const mediaLink: string = await convertTelegramLink(link);
-    ctx.replyWithVideo(mediaLink);
-  } else if(link?.includes('instagram.com/p')){
+    ctx.replyWithVideo(mediaLink,
+      { reply_to_message_id: ctx.message?.message_id });
+  } else if (link?.includes('instagram.com/p')) {
     const mediaLink: string = await convertTelegramLink(link);
-    ctx.replyWithPhoto(mediaLink);
+    ctx.replyWithPhoto(mediaLink,
+      { reply_to_message_id: ctx.message?.message_id });
   } else {
-    ctx.reply('Por favor me envie um link de foto ou reel do instagram');
+    ctx.reply('Por favor me envie um link de foto ou reel do instagram',
+      { reply_to_message_id: ctx.message?.message_id });
   }
 }
 
