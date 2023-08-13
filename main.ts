@@ -1,36 +1,44 @@
-import * as Telegram from 'https://deno.land/x/telegram@v0.1.1/mod.ts';
-import { readAll } from 'https://deno.land/std@0.198.0/streams/read_all.ts';
+import { Application } from 'https://deno.land/x/oak/mod.ts';
+import { oakCors } from 'https://deno.land/x/cors/mod.ts';
+
+import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.9.1/mod.ts';
 import { replyMediaContent } from './service.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 80;
 
-const BOT = new Telegram.Bot(TOKEN);
+const BOT = new Bot(TOKEN);
+const APP = new Application();
 
-// Override Deno.readAll to fix Telegram Bot API
-Deno.readAll = async (r: any) => {
-  console.info('Override deprecated Deno.readAll')
-  return await readAll(r);
-};
+APP.use(oakCors());
 
-BOT.on('text', async (ctx) => {
-  const link: string | undefined = ctx.message?.text;
+BOT.on('message:text', async (ctx) => {
+  const link: string = ctx.msg.text;
+  console.info(`Received message: ${link}`);
   await replyMediaContent(ctx, link);
 });
 
-BOT.use(async (ctx, next) => {
+BOT.catch((err) => {
+  err.ctx.reply(`Algo deu errado: ${err.message}`)
+  console.error(err);
+});
+
+APP.use(async (ctx, next) => {
   try {
-    await next(ctx);
+    if(ctx.request.url.pathname !== '/webhook'){
+      ctx.response.body = 'Use with https://t.me/instagram_media_retriever_bot';
+      ctx.response.status = 200;
+      return;
+    }
+    await next();
   } catch (err) {
-    ctx.reply(`Algo deu errado: ${err.message}`);
-    console.error(err.message, ctx.message);
+    ctx.response.body = { message: err.message };
+    ctx.response.status = 500;
   }
 });
 
-BOT.launch({
-  webhook: {
-    domain: 'imgsed-telegram-bot.deno.dev',
-    path: `/${TOKEN}`,
-    port: PORT,
-  },
-});
+APP.use(webhookCallback(BOT, 'oak'));
+
+APP.listen({ port: PORT }).then(() =>
+  console.log(`🚀 Starting listening Telegram webhook on port ${PORT}`)
+);

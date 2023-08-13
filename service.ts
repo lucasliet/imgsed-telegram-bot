@@ -1,12 +1,15 @@
 import { DOMParser, Element } from 'https://deno.land/x/deno_dom@v0.1.36-alpha/deno-dom-wasm.ts';
-import { Context, State } from "https://deno.land/x/telegram@v0.1.1/context.ts";
+import { Context } from "https://deno.land/x/grammy@v1.9.1/context.ts";
 
 const DOM_PARSER = new DOMParser();
 
-export async function replyMediaContent(ctx: Context<State>, link: string | undefined) {
-  if (link?.includes('instagram.com/reel') || link?.includes('instagram.com/p')) {
+export async function replyMediaContent(ctx: Context, link: string | undefined) {
+  if (link?.includes('instagram.com/reel')) {
     const mediaLink: string = await convertTelegramLink(link);
-    ctx.reply(mediaLink);
+    ctx.replyWithVideo(mediaLink);
+  } else if(link?.includes('instagram.com/p')){
+    const mediaLink: string = await convertTelegramLink(link);
+    ctx.replyWithPhoto(mediaLink);
   } else {
     ctx.reply('Por favor me envie um link de foto ou reel do instagram');
   }
