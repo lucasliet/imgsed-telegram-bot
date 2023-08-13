@@ -8,7 +8,7 @@ export async function replyMediaContent(ctx: Context<State>, link: string | unde
     const mediaLink: string = await convertTelegramLink(link);
     ctx.reply(mediaLink);
   } else {
-    ctx.reply('Please send me a instagram reel/picture link');
+    ctx.reply('Por favor me envie um link de foto ou reel do instagram');
   }
 }
 
