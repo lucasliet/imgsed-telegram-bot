@@ -15,12 +15,13 @@ APP.use(oakCors());
 BOT.on('message:text', async (ctx) => {
   const link: string = ctx.msg.text;
   console.info(`Received message: ${link}`);
-  await replyMediaContent(ctx, link);
-});
-
-BOT.catch((err) => {
-  err.ctx.reply(`Algo deu errado: ${err.message}`)
-  console.error(err);
+  try {
+    await replyMediaContent(ctx, link);
+  } catch (err) {
+    await ctx.reply(`Eita, algo deu errado: ${err.message}`,
+        { reply_to_message_id: ctx.msg.message_id })
+      console.error(err);
+  }
 });
 
 APP.use(async (ctx, next) => {
@@ -39,6 +40,4 @@ APP.use(async (ctx, next) => {
 
 APP.use(webhookCallback(BOT, 'oak'));
 
-APP.listen({ port: PORT }).then(() =>
-  console.log(`🚀 Starting listening Telegram webhook on port ${PORT}`)
-);
+APP.listen({ port: PORT });
