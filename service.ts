@@ -1,4 +1,4 @@
-import { DOMParser, Element, HTMLDocument, Node, NodeList } from 'https://deno.land/x/deno_dom@v0.1.36-alpha/deno-dom-wasm.ts';
+import { DOMParser, Element, HTMLDocument, Node } from 'https://deno.land/x/deno_dom@v0.1.36-alpha/deno-dom-wasm.ts';
 import { Context } from "https://deno.land/x/grammy@v1.17.2/context.ts";
 import { InputMediaBuilder } from "https://deno.land/x/grammy@v1.17.2/mod.ts";
 
@@ -12,15 +12,15 @@ export async function replyMediaContent(ctx: Context, link: string | undefined) 
   }
   const imgsedDom: HTMLDocument = await convertTelegramLink(link);
   const mediaWrap: Element = imgsedDom.querySelector('.media-wrap')!;
-  if(!mediaWrap) throw Error('layout alterado, contatar administrador @lucasliet')
-  
+  if (!mediaWrap) throw Error('layout alterado, contatar administrador @lucasliet')
+
   const description: string | undefined = imgsedDom.querySelector('.desc')?.textContent;
   const videoLink: string | null = mediaWrap.getAttribute('data-video');
 
   if (videoLink) {
     replyVideo(ctx, videoLink, description);
   } else {
-    replyImage(ctx, mediaWrap, description);
+    replyImage(ctx, imgsedDom, description);
   }
 }
 
@@ -29,7 +29,7 @@ async function convertTelegramLink(url: string): Promise<HTMLDocument> {
   const response =
     await fetch(`https://imgsed.com/p/${mediaId}`).then((res) => res.text());
 
-  if(!response) throw Error('servidor fora do ar, tente novamente mais tarde')
+  if (!response) throw Error('servidor fora do ar, tente novamente mais tarde')
 
   return DOM_PARSER.parseFromString(response, 'text/html')!
 }
@@ -39,28 +39,29 @@ function replyVideo(ctx: Context, url: string, caption: string | undefined) {
     { reply_to_message_id: ctx.message?.message_id, caption });
 }
 
-function replyImage(ctx: Context, mediaWrap: Element, caption: string | undefined) {
-  const imageLinks: string[] =
-    Array.from(mediaWrap.querySelectorAll('img'))
-      .map((element: Node) => (element as Element))
-      .map((element: Element) => element.getAttribute('src')!)
+function replyImage(ctx: Context, dom: HTMLDocument, caption: string | undefined) {
+  const slideWrapper = dom.querySelector('.swiper-wrapper');
+  if (slideWrapper) {
+    const imageLinks: string[] =
+      Array.from(slideWrapper.querySelectorAll('.swiper-slide'))
+        .map((element: Node) => (element as Element))
+        .map((element: Element) => element.getAttribute('data-src')!)
 
-  switch (imageLinks.length) {
-    case 0:
-      ctx.reply('Não foi possível encontrar a mídia',
-        { reply_to_message_id: ctx.message?.message_id });
-      return;
-    case 1:
-      ctx.replyWithPhoto(
-        imageLinks[0],
-        { reply_to_message_id: ctx.message?.message_id, caption }
-      );
-      return;
-    default:
-      ctx.replyWithMediaGroup(
-        imageLinks.map((link) => InputMediaBuilder.photo(link, { caption })),
-        { reply_to_message_id: ctx.message?.message_id }
-      );
-      return;
+    ctx.replyWithMediaGroup(
+      imageLinks.map((link) => InputMediaBuilder.photo(link, { caption })),
+      { reply_to_message_id: ctx.message?.message_id }
+    );
+    return;
   }
+
+  const imageLink =
+    dom.querySelector('.media-wrap')!
+      .querySelector('img')!
+      .getAttribute('src')!;
+
+  ctx.replyWithPhoto(
+    imageLink,
+    { reply_to_message_id: ctx.message?.message_id, caption }
+  );
+
 }
