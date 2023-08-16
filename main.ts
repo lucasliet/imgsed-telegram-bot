@@ -1,7 +1,7 @@
 import { Application } from 'https://deno.land/x/oak/mod.ts';
 import { oakCors } from 'https://deno.land/x/cors/mod.ts';
 
-import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.9.1/mod.ts';
+import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import { replyMediaContent } from './service.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
