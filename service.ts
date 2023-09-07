@@ -12,7 +12,13 @@ export async function replyMediaContent(ctx: Context, link: string | undefined) 
   }
   const imgsedDom: HTMLDocument = await convertTelegramLink(link);
   const mediaWrap: Element = imgsedDom.querySelector('.media-wrap')!;
-  if (!mediaWrap) throw Error('layout alterado, contatar administrador @lucasliet')
+  if (!mediaWrap) {
+    // find .media-wrap in imgsedDom.textContent
+    console.error(
+      imgsedDom.textContent
+    );
+    throw Error('layout alterado, contatar administrador @lucasliet')
+  }
 
   const description: string | undefined = imgsedDom.querySelector('.desc')?.textContent;
   const videoLink: string | null = mediaWrap.getAttribute('data-video');
