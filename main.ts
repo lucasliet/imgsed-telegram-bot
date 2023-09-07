@@ -1,5 +1,5 @@
-import { Application } from 'https://deno.land/x/oak/mod.ts';
-import { oakCors } from 'https://deno.land/x/cors/mod.ts';
+import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
 
 import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import { replyMediaContent } from './service.ts';
